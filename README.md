@@ -12,3 +12,7 @@ Broadcast voice messages from a Telegram group chat to infinite connected speake
 
 To achive synchronized playback on all clients (and due to limitations on Telegrams end with command acknowledgements) a coordination server sits in the middle of Telegram and your speaker clients.
 This default server is hosted at https://ee-announcements.loneless.art, but you can simply run your own instance selfhosted or locally using the provided Dockerfile in `server/Dockerfile`.
+
+## Building
+
+`cd client && make BACKEND=http://localhost:4000`

@@ -1,17 +1,18 @@
 import { Server } from "npm:socket.io";
 import { Telegraf } from "npm:telegraf";
 import { message } from "npm:telegraf/filters";
-import { Audio, Message, Voice } from "npm:@telegraf/types";
+import type { Audio, Message, Voice } from "npm:@telegraf/types";
 import { load as loadEnv } from "https://deno.land/std@0.223.0/dotenv/mod.ts";
 
-import { ServerListenEvents, ServerSentEvents } from "./types/Events.ts";
+import type { ServerListenEvents, ServerSentEvents } from "./types/Events.ts";
 import { generateToken, getToken } from "./entities/token.ts";
 import { delJingle, getJingle, setJingle } from "./entities/jingle.ts";
 import { convert } from "./util/convert.ts";
 import { concatUint8Arrays } from "./util/concat.ts";
 
 const env = await loadEnv();
-const BOT_TOKEN = env["TELEGRAM_BOT_TOKEN"];
+const BOT_TOKEN = env["TELEGRAM_BOT_TOKEN"] ??
+  Deno.env.get("TELEGRAM_BOT_TOKEN");
 if (!BOT_TOKEN) throw new Error("Bot token is not provided");
 
 const SUCCESS_STICKER =

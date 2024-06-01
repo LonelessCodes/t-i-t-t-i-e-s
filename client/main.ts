@@ -7,7 +7,7 @@ import { execute } from "./util/execute.ts";
 import { play } from "./util/play.ts";
 
 const env = await loadEnv();
-const SOCKET_SERVER = env["SOCKET_SERVER"];
+const SOCKET_SERVER = env["SOCKET_SERVER"] ?? Deno.env.get("SOCKET_SERVER");
 if (!SOCKET_SERVER) throw new Error("SOCKET_SERVER is not provided");
 
 if (!await execute("which", ["aplay"])) {

@@ -7,29 +7,37 @@ import { execute } from "./util/execute.ts";
 import { play } from "./util/play.ts";
 
 const env = await loadEnv();
-const SOCKET_SERVER = env["SOCKET_SERVER"] ?? Deno.env.get("SOCKET_SERVER");
-if (!SOCKET_SERVER) throw new Error("SOCKET_SERVER is not provided");
 
 if (!await execute("which", ["aplay"])) {
   console.error(
-    "ERROR: Install aplay first. apt-get install alsa-base alsa-utils",
+    "ERROR: Install aplay first. On Debian based systems: apt-get install alsa-base alsa-utils",
   );
   Deno.exit(1);
 }
 
 const {
-  flags: { token },
+  flags: {
+    token,
+    backend = env["SOCKET_SERVER"] ?? Deno.env.get("SOCKET_SERVER"),
+  },
 } = parseFlags(Deno.args);
 
+if (typeof backend !== "string") {
+  console.error(
+    "ERROR: Pass a backend url as an argument. e.g. --backend=http://localhost:3000",
+  );
+  Deno.exit(1);
+}
 if (typeof token !== "string") {
   console.error(
-    "ERROR: Pass a token as an argument. e.g. --token=ABC45\n" +
-      "       You can get a token by sending /token in the chat.",
+    "ERROR: Pass a chat token as an argument. e.g. --token=ABC45\n" +
+      "       You can get a chat token by sending /token in the chat.\n" +
+      "       This is required so the client knows from which chat to play announcements from.",
   );
   Deno.exit(1);
 }
 
-const client: Socket<ServerSentEvents> = io(SOCKET_SERVER, {
+const client: Socket<ServerSentEvents> = io(backend, {
   transports: ["websocket"],
   timeout: 5000,
   auth: { token },

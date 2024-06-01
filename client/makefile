@@ -4,7 +4,7 @@ export
 CCARGS = -A --unstable-kv
 CC = deno compile $(CCARGS)
 OUTDIR = out
-NAME = ee-announcements-client
+NAME = titties-client
 
 all: linux
 

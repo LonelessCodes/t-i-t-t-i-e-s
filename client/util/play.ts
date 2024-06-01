@@ -16,9 +16,14 @@ export async function play(audioData: ArrayBuffer, signal: AbortSignal) {
     stderr: "piped",
   }).spawn();
 
-  signal.addEventListener("abort", () => {
-    aplayProcess.kill();
-  });
+  const abortHandler = () => {
+    try {
+      aplayProcess.kill();
+    } catch (error) {
+      console.error("could kill process", error);
+    }
+  };
+  signal.addEventListener("abort", abortHandler);
 
   try {
     const aplayWriter = aplayProcess.stdin.getWriter();
@@ -26,6 +31,8 @@ export async function play(audioData: ArrayBuffer, signal: AbortSignal) {
     await aplayWriter.close();
 
     const status = await aplayProcess.output();
+
+    signal.removeEventListener("abort", abortHandler);
 
     return status.success;
   } catch {

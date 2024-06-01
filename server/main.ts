@@ -62,6 +62,7 @@ bot.use(async (ctx, next) => {
   }
 });
 
+// helper for looking up sticker id
 bot.on(message("sticker"), async (ctx) => {
   await ctx.replyWithMarkdownV2(
     `fileId: \`${ctx.message.sticker.file_id}\``,
@@ -137,7 +138,7 @@ bot.command("play", async (ctx) => {
   const voice = getAudio(ctx.message.reply_to_message);
   if (!voice) {
     return await ctx.reply(
-      "Antworte mit /play bitte nur auf eine Sprachnachricht oder Audiodatei",
+      "Antworte mit /play bitte **nur** auf eine Sprachnachricht oder Audiodatei",
     );
   }
 
@@ -147,7 +148,7 @@ bot.command("play", async (ctx) => {
   const filesData = await Promise.all(
     files.map(async (file) => {
       const url = await ctx.telegram.getFileLink(file);
-      return await convert(url);
+      return (await convert(url.toString()));
     }),
   );
   const concatData = concatUint8Arrays(filesData);
@@ -217,7 +218,7 @@ bot.command("play", async (ctx) => {
 
     console.log("  played %d clients", successfulPlaySockets.size);
     await ctx.reply(
-      `${successfulPrepareSockets.size} Clients haben erfolgreich geantwortet, davon ${successfulPlaySockets.size} Clients erfolgreich zuende.`,
+      `${successfulPrepareSockets.size} Clients haben erfolgreich geantwortet, davon ${successfulPlaySockets.size} Clients erfolgreich zuende gespielt.`,
     );
   })();
 });

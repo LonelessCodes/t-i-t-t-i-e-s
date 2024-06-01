@@ -8,7 +8,7 @@ COPY . ./
 
 RUN deno cache main.ts
 
-VOLUME [ "/data" ]
+VOLUME [ "/app/data" ]
 EXPOSE 4000
 
 CMD ["run", "-A", "--unstable-kv", "main.ts"]

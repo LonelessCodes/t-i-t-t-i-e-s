@@ -1,0 +1,206 @@
+import { Telegraf } from "npm:telegraf";
+import type { Audio, Message, Voice } from "npm:@telegraf/types";
+import { load as loadEnv } from "https://deno.land/std@0.223.0/dotenv/mod.ts";
+
+import { delJingle, getJingle, setJingle } from "../server/entities/jingle.ts";
+import { convert } from "../server/util/convert.ts";
+import { concatUint8Arrays } from "../server/util/concat.ts";
+import { execute } from "../client/util/execute.ts";
+import { playCombined, stopCombined } from "./player.ts";
+
+if (!await execute("which", ["aplay"])) {
+  console.error(
+    "ERROR: Install aplay first. On Debian based systems: apt-get install alsa-base alsa-utils",
+  );
+  Deno.exit(1);
+}
+
+const env = await loadEnv();
+
+const BOT_TOKEN = env["TELEGRAM_BOT_TOKEN"] ??
+  Deno.env.get("TELEGRAM_BOT_TOKEN");
+
+if (!BOT_TOKEN) throw new Error("Bot token is not provided. BOT_TOKEN");
+const HEARTBEAT_URL = env["HEARTBEAT_URL"] ??
+  Deno.env.get("HEARTBEAT_URL");
+
+const GROUP_IDS_STR = env["HEARTBEAT_URL"] ??
+  Deno.env.get("HEARTBEAT_URL");
+const GROUP_IDS = GROUP_IDS_STR
+  ? new Set<number>(GROUP_IDS_STR.split(",").map((str) => parseInt(str)))
+  : null;
+
+const SUCCESS_STICKER =
+  "CAACAgIAAxkBAAM3ZjJfXjjA2f2b6XQxe4XaQmKNxeIAAvs3AAI5gHFKJrwazBIUrX00BA";
+const FAILURE_STICKER =
+  "CAACAgIAAxkBAAIBpGYztc_X1JsfBV5RJDIH61eFCxgnAAK7TgACzgxoSqALpFdC2ekCNAQ";
+
+const bot = new Telegraf(BOT_TOKEN, {
+  handlerTimeout: 5 * 60 * 1000,
+});
+
+// error handler
+bot.use(async (ctx, next) => {
+  if (!ctx.chat || (GROUP_IDS && !GROUP_IDS.has(ctx.chat.id))) {
+    return;
+  }
+
+  if (!ctx.message || ctx.message?.date < (Date.now() / 1000) - 3600) {
+    return;
+  }
+
+  try {
+    await next();
+  } catch (error) {
+    console.error(error);
+    await ctx.replyWithSticker(FAILURE_STICKER);
+    await ctx.reply("Unexpected Error: " + error.message);
+  }
+});
+
+function getAudio(message: Message): Voice | Audio | null {
+  if ("voice" in message) {
+    return message.voice;
+  } else if ("audio" in message) {
+    return message.audio;
+  } else {
+    return null;
+  }
+}
+
+bot.command("jingle", async (ctx) => {
+  console.log("/jingle", ctx.chat.id);
+
+  if (!ctx.message.reply_to_message) {
+    return await ctx.reply(
+      "Antworte mit /jingle bitte auf eine Sprachnachricht oder Audiodatei",
+    );
+  }
+
+  const voice = getAudio(ctx.message.reply_to_message);
+  if (!voice) {
+    return await ctx.reply(
+      "Antworte mit /jingle bitte nur auf eine Sprachnachricht oder Audiodatei",
+    );
+  }
+
+  if ((voice.file_size ?? 0) > 1024 * 1024 * 20) {
+    return await ctx.reply(
+      "Die Audiodatei kann nicht größer als 20MB sein, weil Telegram API doof...",
+    );
+  }
+
+  await setJingle(ctx.chat.id, voice);
+
+  console.log("  set jingle", voice.file_id);
+  await ctx.replyWithSticker(SUCCESS_STICKER);
+});
+
+bot.command("deljingle", async (ctx) => {
+  console.log("/deljingle", ctx.chat.id);
+
+  await delJingle(ctx.chat.id);
+
+  console.log("  deleted jingle");
+  await ctx.replyWithSticker(SUCCESS_STICKER);
+});
+
+bot.command("play", async (ctx) => {
+  console.log("/play", ctx.chat.id);
+
+  if (!ctx.message.reply_to_message) {
+    return await ctx.reply(
+      "Antworte mit /play bitte auf eine Sprachnachricht oder Audiodatei",
+    );
+  }
+
+  const voice = getAudio(ctx.message.reply_to_message);
+  if (!voice) {
+    return await ctx.reply(
+      "Antworte mit /play bitte **nur** auf eine Sprachnachricht oder Audiodatei",
+    );
+  }
+
+  if ((voice.file_size ?? 0) > 1024 * 1024 * 20) {
+    return await ctx.reply(
+      "Die Audiodatei kann nicht größer als 20MB sein, weil Telegram API doof...",
+    );
+  }
+
+  await ctx.reply(`Downloading + converting...`);
+
+  const jingle = await getJingle(ctx.chat.id);
+
+  const files = [jingle, voice].filter(Boolean) as (Voice | Audio)[];
+  const filesData = await Promise.all(
+    files.map(async (file) => {
+      const url = await ctx.telegram.getFileLink(file);
+      return (await convert(url.toString()));
+    }),
+  );
+  const concatData = concatUint8Arrays(filesData);
+
+  await ctx.replyWithSticker(SUCCESS_STICKER);
+  await ctx.reply(`Spiele ab...`);
+
+  (async () => {
+    try {
+      console.log(
+        "  prepare, eventId %d, %d bytes",
+        ctx.msgId,
+        concatData.byteLength,
+      );
+
+      const notInterrupted = await playCombined(ctx.msgId, concatData);
+
+      console.log("  played, not interrupted %s", notInterrupted);
+      if (notInterrupted) {
+        await ctx.reply("Erfolgreich zuende gespielt.");
+      }
+    } catch (error) {
+      console.error("playing failed: ", error);
+    }
+  })();
+});
+
+bot.command("stop", async (ctx) => {
+  stopCombined();
+  await ctx.reply("Erfolgreich gestoppt.");
+});
+
+// Enable graceful stop
+globalThis.addEventListener("unload", () => {
+  bot.stop("unload");
+});
+
+async function pushHeartbeat() {
+  try {
+    await bot.telegram.getMe();
+    await fetch(HEARTBEAT_URL);
+  } catch (error) {
+    console.error("internet down", error);
+  }
+}
+
+if (HEARTBEAT_URL) {
+  setInterval(pushHeartbeat, 60 * 1000);
+  pushHeartbeat();
+}
+
+for (;;) {
+  try {
+    await bot.launch(() => {
+      console.log(">>> launched");
+
+      // restart every 12 hours, just to be sure it doesn't hang
+      setTimeout(() => {
+        Deno.exit(0);
+      }, 1000 * 3600 * 12);
+    });
+    break;
+  } catch (error) {
+    console.error(error);
+
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+  }
+}

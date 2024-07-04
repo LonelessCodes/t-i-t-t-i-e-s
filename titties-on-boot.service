@@ -1,0 +1,12 @@
+[Unit]
+Description=Running the TITTIES bot and client.
+After=multi-user.target
+
+[Service]
+WorkingDirectory=/home/rock/ee-announcements/standalone
+ExecStart=/home/rock/.deno/bin/deno run -A --unstable-kv main.ts
+Restart=always
+User=rock
+
+[Install]
+WantedBy=multi-user.target

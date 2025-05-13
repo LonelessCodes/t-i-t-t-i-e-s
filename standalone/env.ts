@@ -1,20 +1,18 @@
-import { load as loadEnv } from "https://deno.land/std@0.223.0/dotenv/mod.ts";
+import "@std/dotenv/load";
 
-const env = await loadEnv();
+function missing(message: string): never {
+  throw new Error(message);
+}
 
-export const BOT_TOKEN = env["TELEGRAM_BOT_TOKEN"] ??
-  Deno.env.get("TELEGRAM_BOT_TOKEN") ?? null;
+export const BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN") ??
+  missing("Bot token is not provided. BOT_TOKEN");
 
-export const HEARTBEAT_URL = env["HEARTBEAT_URL"] ??
-  Deno.env.get("HEARTBEAT_URL") ?? null;
+export const HEARTBEAT_URL = Deno.env.get("HEARTBEAT_URL");
 
-const GROUP_IDS_STR = env["GROUP_IDS"] ?? Deno.env.get("GROUP_IDS") ?? null;
+const GROUP_IDS_STR = Deno.env.get("GROUP_IDS");
 export const GROUP_IDS = GROUP_IDS_STR
   ? new Set<number>(GROUP_IDS_STR.split(",").map((str) => parseInt(str)))
   : null;
 
-export const SUCCESS_STICKER = env["SUCCESS_STICKER_ID"] ??
-  Deno.env.get("SUCCESS_STICKER_ID") ?? null;
-
-export const FAILURE_STICKER = env["FAILURE_STICKER_ID"] ??
-  Deno.env.get("FAILURE_STICKER_ID") ?? null;
+export const SUCCESS_STICKER = Deno.env.get("SUCCESS_STICKER_ID");
+export const FAILURE_STICKER = Deno.env.get("FAILURE_STICKER_ID");

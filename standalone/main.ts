@@ -14,8 +14,6 @@ import {
   SUCCESS_STICKER,
 } from "./env.ts";
 
-if (!BOT_TOKEN) throw new Error("Bot token is not provided. BOT_TOKEN");
-
 if (!await execute("aplay", ["-L"])) {
   console.error(
     "ERROR: Install aplay first. On Debian based systems: apt-get install alsa-base alsa-utils",

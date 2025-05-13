@@ -3,7 +3,7 @@ name: Build and Publish Docker Image
 on:
   push:
     paths:
-      - 'server/**'
+      - 'standalone/**'
 
 env:
   REGISTRY: ghcr.io
@@ -43,8 +43,8 @@ jobs:
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
-        context: ./server
-        file: server/Dockerfile
+        context: ./standalone
+        file: standalone/Dockerfile
         labels: ${{ steps.meta.outputs.labels }}
         tags: |
           ${{ steps.meta.outputs.tags }}

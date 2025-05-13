@@ -1,0 +1,12 @@
+services:
+  titties:
+    image: ghcr.io/lonelesscodes/t-i-t-t-i-e-s:latest
+    build:
+      context: ./standalone/
+      dockerfile: Dockerfile
+    container_name: titties
+    env_file:
+      - .env
+    devices:
+      - /dev/snd:/dev/snd
+    restart: unless-stopped

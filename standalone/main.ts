@@ -5,7 +5,7 @@ import { load as loadEnv } from "https://deno.land/std@0.223.0/dotenv/mod.ts";
 import { delJingle, getJingle, setJingle } from "../server/entities/jingle.ts";
 import { convert } from "../server/util/convert.ts";
 import { concatUint8Arrays } from "../server/util/concat.ts";
-import { execute } from "../client/util/execute.ts";
+import { execute } from "../util/execute.ts";
 import { playCombined, stopCombined } from "./player.ts";
 
 if (!await execute("which", ["aplay"])) {
@@ -151,7 +151,7 @@ bot.command("play", async (ctx) => {
         concatData.byteLength,
       );
 
-      const notInterrupted = await playCombined(ctx.msgId, concatData);
+      const notInterrupted = await playCombined(ctx.msgId, concatData.buffer);
 
       console.log("  played, not interrupted %s", notInterrupted);
       if (notInterrupted) {

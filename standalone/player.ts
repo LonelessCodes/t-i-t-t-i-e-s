@@ -1,8 +1,11 @@
-import { play } from "../client/util/play.ts";
+import { play } from "../util/play.ts";
 
 let controller: AbortController | undefined;
 
-export async function playCombined(eventId: number, audioData: ArrayBuffer) {
+export async function playCombined(
+  eventId: number,
+  audioData: ArrayBufferLike,
+) {
   controller?.abort();
   controller = new AbortController();
 

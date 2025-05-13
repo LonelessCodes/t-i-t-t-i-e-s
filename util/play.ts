@@ -1,4 +1,4 @@
-export async function play(audioData: ArrayBuffer, signal: AbortSignal) {
+export async function play(audioData: ArrayBufferLike, signal: AbortSignal) {
   const byteData = new Uint8Array(audioData);
 
   const aplayProcess = new Deno.Command("aplay", {

@@ -6,7 +6,7 @@ import { delJingle, getJingle, setJingle } from "../server/entities/jingle.ts";
 import { convert } from "../server/util/convert.ts";
 import { concatUint8Arrays } from "../server/util/concat.ts";
 import { execute } from "../util/execute.ts";
-import { playCombined, stopCombined } from "./player.ts";
+import { CombinedPlayer } from "./CombinedPlayer.ts";
 import {
   BOT_TOKEN,
   FAILURE_STICKER,
@@ -36,6 +36,7 @@ const resetInactiveTimeout = debounce((bot: Telegraf) => {
   Deno.exit(0);
 }, INACTIVE_TIMEOUT);
 
+const player = new CombinedPlayer();
 const bot = new Telegraf(BOT_TOKEN, {
   handlerTimeout: HANDLER_TIMEOUT,
 });
@@ -167,7 +168,7 @@ bot.command("play", async (ctx) => {
         concatData.byteLength,
       );
 
-      const notInterrupted = await playCombined(ctx.msgId, concatData.buffer);
+      const notInterrupted = await player.play(ctx.msgId, concatData.buffer);
 
       console.log("  played, not interrupted %s", notInterrupted);
       if (notInterrupted) {
@@ -180,7 +181,7 @@ bot.command("play", async (ctx) => {
 });
 
 bot.command("stop", async (ctx) => {
-  stopCombined();
+  player.stop();
   await ctx.reply("Stopped successfully.");
 });
 

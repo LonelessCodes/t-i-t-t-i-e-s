@@ -8,7 +8,7 @@ import { concatUint8Arrays } from "../server/util/concat.ts";
 import { execute } from "../util/execute.ts";
 import { playCombined, stopCombined } from "./player.ts";
 
-if (!await execute("which", ["aplay"])) {
+if (!await execute("aplay", ["-L"])) {
   console.error(
     "ERROR: Install aplay first. On Debian based systems: apt-get install alsa-base alsa-utils",
   );

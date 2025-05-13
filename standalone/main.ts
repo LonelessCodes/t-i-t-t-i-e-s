@@ -1,12 +1,20 @@
 import { Telegraf } from "npm:telegraf";
 import type { Audio, Message, Voice } from "npm:@telegraf/types";
-import { load as loadEnv } from "https://deno.land/std@0.223.0/dotenv/mod.ts";
 
 import { delJingle, getJingle, setJingle } from "../server/entities/jingle.ts";
 import { convert } from "../server/util/convert.ts";
 import { concatUint8Arrays } from "../server/util/concat.ts";
 import { execute } from "../util/execute.ts";
 import { playCombined, stopCombined } from "./player.ts";
+import {
+  BOT_TOKEN,
+  FAILURE_STICKER,
+  GROUP_IDS,
+  HEARTBEAT_URL,
+  SUCCESS_STICKER,
+} from "./env.ts";
+
+if (!BOT_TOKEN) throw new Error("Bot token is not provided. BOT_TOKEN");
 
 if (!await execute("aplay", ["-L"])) {
   console.error(
@@ -15,26 +23,11 @@ if (!await execute("aplay", ["-L"])) {
   Deno.exit(1);
 }
 
-const env = await loadEnv();
-
-const BOT_TOKEN = env["TELEGRAM_BOT_TOKEN"] ??
-  Deno.env.get("TELEGRAM_BOT_TOKEN");
-
-if (!BOT_TOKEN) throw new Error("Bot token is not provided. BOT_TOKEN");
-const HEARTBEAT_URL = env["HEARTBEAT_URL"] ??
-  Deno.env.get("HEARTBEAT_URL");
-
-const GROUP_IDS_STR = env["HEARTBEAT_URL"] ??
-  Deno.env.get("HEARTBEAT_URL");
-const GROUP_IDS = GROUP_IDS_STR
-  ? new Set<number>(GROUP_IDS_STR.split(",").map((str) => parseInt(str)))
-  : null;
 
 const SUCCESS_STICKER =
   "CAACAgIAAxkBAAM3ZjJfXjjA2f2b6XQxe4XaQmKNxeIAAvs3AAI5gHFKJrwazBIUrX00BA";
 const FAILURE_STICKER =
   "CAACAgIAAxkBAAIBpGYztc_X1JsfBV5RJDIH61eFCxgnAAK7TgACzgxoSqALpFdC2ekCNAQ";
-
 const bot = new Telegraf(BOT_TOKEN, {
   handlerTimeout: 5 * 60 * 1000,
 });

@@ -1,7 +1,0 @@
-{
-  "tasks": {
-    // call like "deno task run --token=ABC45"
-    "run": "deno run -A main.ts",
-    "compile": "make"
-  }
-}

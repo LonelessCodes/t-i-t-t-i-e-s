@@ -23,11 +23,6 @@ if (!await execute("aplay", ["-L"])) {
   Deno.exit(1);
 }
 
-
-const SUCCESS_STICKER =
-  "CAACAgIAAxkBAAM3ZjJfXjjA2f2b6XQxe4XaQmKNxeIAAvs3AAI5gHFKJrwazBIUrX00BA";
-const FAILURE_STICKER =
-  "CAACAgIAAxkBAAIBpGYztc_X1JsfBV5RJDIH61eFCxgnAAK7TgACzgxoSqALpFdC2ekCNAQ";
 const bot = new Telegraf(BOT_TOKEN, {
   handlerTimeout: 5 * 60 * 1000,
 });
@@ -46,8 +41,10 @@ bot.use(async (ctx, next) => {
     await next();
   } catch (error) {
     console.error(error);
-    await ctx.replyWithSticker(FAILURE_STICKER);
-    await ctx.reply("Unexpected Error: " + error.message);
+    if (FAILURE_STICKER) {
+      await ctx.replyWithSticker(FAILURE_STICKER);
+    }
+    await ctx.reply("Unexpected Error: " + String(error));
   }
 });
 
@@ -86,7 +83,11 @@ bot.command("jingle", async (ctx) => {
   await setJingle(ctx.chat.id, voice);
 
   console.log("  set jingle", voice.file_id);
-  await ctx.replyWithSticker(SUCCESS_STICKER);
+  if (SUCCESS_STICKER) {
+    await ctx.replyWithSticker(SUCCESS_STICKER);
+  } else {
+    await ctx.reply("Jingle gespeichert.");
+  }
 });
 
 bot.command("deljingle", async (ctx) => {
@@ -95,7 +96,11 @@ bot.command("deljingle", async (ctx) => {
   await delJingle(ctx.chat.id);
 
   console.log("  deleted jingle");
-  await ctx.replyWithSticker(SUCCESS_STICKER);
+  if (SUCCESS_STICKER) {
+    await ctx.replyWithSticker(SUCCESS_STICKER);
+  } else {
+    await ctx.reply("Jingle gelöscht.");
+  }
 });
 
 bot.command("play", async (ctx) => {
@@ -133,7 +138,9 @@ bot.command("play", async (ctx) => {
   );
   const concatData = concatUint8Arrays(filesData);
 
-  await ctx.replyWithSticker(SUCCESS_STICKER);
+  if (SUCCESS_STICKER) {
+    await ctx.replyWithSticker(SUCCESS_STICKER);
+  }
   await ctx.reply(`Spiele ab...`);
 
   (async () => {

@@ -12,3 +12,9 @@ const GROUP_IDS_STR = env["GROUP_IDS"] ?? Deno.env.get("GROUP_IDS") ?? null;
 export const GROUP_IDS = GROUP_IDS_STR
   ? new Set<number>(GROUP_IDS_STR.split(",").map((str) => parseInt(str)))
   : null;
+
+export const SUCCESS_STICKER = env["SUCCESS_STICKER_ID"] ??
+  Deno.env.get("SUCCESS_STICKER_ID") ?? null;
+
+export const FAILURE_STICKER = env["FAILURE_STICKER_ID"] ??
+  Deno.env.get("FAILURE_STICKER_ID") ?? null;

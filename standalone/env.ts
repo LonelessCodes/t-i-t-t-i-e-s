@@ -9,6 +9,14 @@ export const BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN") ??
 
 export const HEARTBEAT_URL = Deno.env.get("HEARTBEAT_URL");
 
+const HEARTBEAT_INTERVAL_RAW =
+  parseInt(Deno.env.get("HEARTBEAT_INTERVAL") ?? "60") * 1000;
+export const HEARTBEAT_INTERVAL = isNaN(HEARTBEAT_INTERVAL_RAW)
+  ? missing(
+    "HEARTBEAT_INTERVAL must be a number. Got: " + HEARTBEAT_INTERVAL_RAW,
+  )
+  : HEARTBEAT_INTERVAL_RAW;
+
 const GROUP_IDS_STR = Deno.env.get("GROUP_IDS");
 export const GROUP_IDS = GROUP_IDS_STR
   ? new Set<number>(GROUP_IDS_STR.split(",").map((str) => parseInt(str)))

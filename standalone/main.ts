@@ -10,6 +10,7 @@ import {
   BOT_TOKEN,
   FAILURE_STICKER,
   GROUP_IDS,
+  HEARTBEAT_INTERVAL,
   HEARTBEAT_URL,
   SUCCESS_STICKER,
 } from "./env.ts";
@@ -173,20 +174,6 @@ Deno.addSignalListener("SIGINT", () => {
   Deno.exit(0);
 });
 
-async function pushHeartbeat() {
-  try {
-    await bot.telegram.getMe();
-    await fetch(HEARTBEAT_URL);
-  } catch (error) {
-    console.error("internet down", error);
-  }
-}
-
-if (HEARTBEAT_URL) {
-  setInterval(pushHeartbeat, 60 * 1000);
-  pushHeartbeat();
-}
-
 for (;;) {
   try {
     await bot.launch(() => {
@@ -201,6 +188,19 @@ for (;;) {
         bot.stop("restart");
         Deno.exit(0);
       }, 1000 * 3600 * 12);
+
+      if (HEARTBEAT_URL) {
+        const pushHeartbeat = async () => {
+          try {
+            await bot.telegram.getMe();
+            await fetch(HEARTBEAT_URL!);
+          } catch (error) {
+            console.error("internet down", error);
+          }
+        };
+        setInterval(pushHeartbeat, HEARTBEAT_INTERVAL);
+        pushHeartbeat();
+      }
     });
     break;
   } catch (error) {

@@ -22,17 +22,23 @@ if (!await execute("aplay", ["-L"])) {
   Deno.exit(1);
 }
 
+// some constants
+const HANDLER_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+const MSG_TIMEOUT = 1000 * 3600; // 1 hour
+const FILE_SIZE_LIMIT = 1024 * 1024 * 20; // 20MB
+
 const bot = new Telegraf(BOT_TOKEN, {
-  handlerTimeout: 5 * 60 * 1000,
+  handlerTimeout: HANDLER_TIMEOUT,
 });
 
-// error handler
 bot.use(async (ctx, next) => {
+  // discard messages from unknown chats
   if (!ctx.chat || (GROUP_IDS && !GROUP_IDS.has(ctx.chat.id))) {
     return;
   }
 
-  if (!ctx.message || ctx.message?.date < (Date.now() / 1000) - 3600) {
+  // discard messages older than 1 hour
+  if (!ctx.message || ctx.message.date < (Date.now() - MSG_TIMEOUT) / 1000) {
     return;
   }
 
@@ -73,7 +79,7 @@ bot.command("jingle", async (ctx) => {
     );
   }
 
-  if ((voice.file_size ?? 0) > 1024 * 1024 * 20) {
+  if ((voice.file_size ?? 0) > FILE_SIZE_LIMIT) {
     return await ctx.reply(
       "The audio file cannot be larger than 20MB due to Telegram API limitations.",
     );
@@ -118,7 +124,7 @@ bot.command("play", async (ctx) => {
     );
   }
 
-  if ((voice.file_size ?? 0) > 1024 * 1024 * 20) {
+  if ((voice.file_size ?? 0) > FILE_SIZE_LIMIT) {
     return await ctx.reply(
       "The audio file cannot be larger than 20MB due to Telegram API limitations.",
     );

@@ -169,8 +169,10 @@ bot.command("stop", async (ctx) => {
 });
 
 // Enable graceful stop
-globalThis.addEventListener("unload", () => {
-  bot.stop("unload");
+Deno.addSignalListener("SIGINT", () => {
+  console.log(">>> stopping bot...");
+  bot.stop("stop");
+  Deno.exit(0);
 });
 
 async function pushHeartbeat() {

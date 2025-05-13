@@ -38,7 +38,6 @@ if (typeof token !== "string") {
 }
 
 const client: Socket<ServerSentEvents> = io(backend, {
-  transports: ["websocket"],
   timeout: 5000,
   auth: { token },
 });

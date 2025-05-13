@@ -194,6 +194,8 @@ for (;;) {
 
       // restart every 12 hours, just to be sure it doesn't hang
       setTimeout(() => {
+        console.log(">>> Restarting bot...");
+        bot.stop("restart");
         Deno.exit(0);
       }, 1000 * 3600 * 12);
     });

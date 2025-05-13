@@ -2,10 +2,10 @@ import { Telegraf } from "npm:telegraf";
 import type { Audio, Message, Voice } from "npm:@telegraf/types";
 import { debounce } from "@std/async/debounce";
 
-import { delJingle, getJingle, setJingle } from "../server/entities/jingle.ts";
-import { convert } from "../server/util/convert.ts";
-import { concatUint8Arrays } from "../server/util/concat.ts";
-import { execute } from "../util/execute.ts";
+import { delJingle, getJingle, setJingle } from "./util/entities/jingle.ts";
+import { convert } from "./util/convert.ts";
+import { concatUint8Arrays } from "./util/concat.ts";
+import { execute } from "./util/execute.ts";
 import { CombinedPlayer } from "./CombinedPlayer.ts";
 import {
   BOT_TOKEN,

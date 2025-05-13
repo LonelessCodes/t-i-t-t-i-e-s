@@ -63,20 +63,20 @@ bot.command("jingle", async (ctx) => {
 
   if (!ctx.message.reply_to_message) {
     return await ctx.reply(
-      "Antworte mit /jingle bitte auf eine Sprachnachricht oder Audiodatei",
+      "Please reply with /jingle to a voice message or audio file",
     );
   }
 
   const voice = getAudio(ctx.message.reply_to_message);
   if (!voice) {
     return await ctx.reply(
-      "Antworte mit /jingle bitte nur auf eine Sprachnachricht oder Audiodatei",
+      "Please reply with /jingle **only** to a voice message or audio file",
     );
   }
 
   if ((voice.file_size ?? 0) > 1024 * 1024 * 20) {
     return await ctx.reply(
-      "Die Audiodatei kann nicht größer als 20MB sein, weil Telegram API doof...",
+      "The audio file cannot be larger than 20MB due to Telegram API limitations.",
     );
   }
 
@@ -86,7 +86,7 @@ bot.command("jingle", async (ctx) => {
   if (SUCCESS_STICKER) {
     await ctx.replyWithSticker(SUCCESS_STICKER);
   } else {
-    await ctx.reply("Jingle gespeichert.");
+    await ctx.reply("Jingle saved.");
   }
 });
 
@@ -99,7 +99,7 @@ bot.command("deljingle", async (ctx) => {
   if (SUCCESS_STICKER) {
     await ctx.replyWithSticker(SUCCESS_STICKER);
   } else {
-    await ctx.reply("Jingle gelöscht.");
+    await ctx.reply("Jingle deleted.");
   }
 });
 
@@ -108,20 +108,20 @@ bot.command("play", async (ctx) => {
 
   if (!ctx.message.reply_to_message) {
     return await ctx.reply(
-      "Antworte mit /play bitte auf eine Sprachnachricht oder Audiodatei",
+      "Please reply with /play to a voice message or audio file",
     );
   }
 
   const voice = getAudio(ctx.message.reply_to_message);
   if (!voice) {
     return await ctx.reply(
-      "Antworte mit /play bitte **nur** auf eine Sprachnachricht oder Audiodatei",
+      "Please reply with /play **only** to a voice message or audio file",
     );
   }
 
   if ((voice.file_size ?? 0) > 1024 * 1024 * 20) {
     return await ctx.reply(
-      "Die Audiodatei kann nicht größer als 20MB sein, weil Telegram API doof...",
+      "The audio file cannot be larger than 20MB due to Telegram API limitations.",
     );
   }
 
@@ -141,7 +141,7 @@ bot.command("play", async (ctx) => {
   if (SUCCESS_STICKER) {
     await ctx.replyWithSticker(SUCCESS_STICKER);
   }
-  await ctx.reply(`Spiele ab...`);
+  await ctx.reply(`Playing...`);
 
   (async () => {
     try {
@@ -155,7 +155,7 @@ bot.command("play", async (ctx) => {
 
       console.log("  played, not interrupted %s", notInterrupted);
       if (notInterrupted) {
-        await ctx.reply("Erfolgreich zuende gespielt.");
+        await ctx.reply("Played successfully.");
       }
     } catch (error) {
       console.error("playing failed: ", error);
@@ -165,7 +165,7 @@ bot.command("play", async (ctx) => {
 
 bot.command("stop", async (ctx) => {
   stopCombined();
-  await ctx.reply("Erfolgreich gestoppt.");
+  await ctx.reply("Stopped successfully.");
 });
 
 // Enable graceful stop

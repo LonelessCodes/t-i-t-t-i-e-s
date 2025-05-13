@@ -1,11 +1,15 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@std/async@^1.0.13": "1.0.13",
     "jsr:@std/dotenv@~0.225.4": "0.225.4",
     "npm:@telegraf/types@*": "7.1.0",
     "npm:telegraf@*": "4.16.3"
   },
   "jsr": {
+    "@std/async@1.0.13": {
+      "integrity": "1d76ca5d324aef249908f7f7fe0d39aaf53198e5420604a59ab5c035adc97c96"
+    },
     "@std/dotenv@0.225.4": {
       "integrity": "2a672c2b192abe535dcfea1ae89f219ee3979af6aad7d185cb19206ee9bc5caf"
     }
@@ -104,6 +108,7 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@std/async@^1.0.13",
       "jsr:@std/dotenv@~0.225.4"
     ]
   }

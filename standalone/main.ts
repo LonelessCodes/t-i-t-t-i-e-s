@@ -1,5 +1,6 @@
 import { Telegraf } from "npm:telegraf";
 import type { Audio, Message, Voice } from "npm:@telegraf/types";
+import { debounce } from "@std/async/debounce";
 
 import { delJingle, getJingle, setJingle } from "../server/entities/jingle.ts";
 import { convert } from "../server/util/convert.ts";
@@ -24,14 +25,24 @@ if (!await execute("aplay", ["-L"])) {
 
 // some constants
 const HANDLER_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+const INACTIVE_TIMEOUT = 1000 * 3600; // 1 hour
 const MSG_TIMEOUT = 1000 * 3600; // 1 hour
 const FILE_SIZE_LIMIT = 1024 * 1024 * 20; // 20MB
+
+// restart bot after 1 hour of inactivity, just to be sure it doesn't hang
+const resetInactiveTimeout = debounce((bot: Telegraf) => {
+  console.log(">>> inactive timeout, stopping bot...");
+  bot.stop("inactive");
+  Deno.exit(0);
+}, INACTIVE_TIMEOUT);
 
 const bot = new Telegraf(BOT_TOKEN, {
   handlerTimeout: HANDLER_TIMEOUT,
 });
 
 bot.use(async (ctx, next) => {
+  resetInactiveTimeout(bot);
+
   // discard messages from unknown chats
   if (!ctx.chat || (GROUP_IDS && !GROUP_IDS.has(ctx.chat.id))) {
     return;
@@ -188,12 +199,7 @@ for (;;) {
         [...GROUP_IDS ?? []],
       );
 
-      // restart every 12 hours, just to be sure it doesn't hang
-      setTimeout(() => {
-        console.log(">>> Restarting bot...");
-        bot.stop("restart");
-        Deno.exit(0);
-      }, 1000 * 3600 * 12);
+      resetInactiveTimeout(bot);
 
       if (HEARTBEAT_URL) {
         const pushHeartbeat = async () => {

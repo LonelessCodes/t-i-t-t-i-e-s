@@ -190,7 +190,10 @@ if (HEARTBEAT_URL) {
 for (;;) {
   try {
     await bot.launch(() => {
-      console.log(">>> launched");
+      console.log(
+        ">>> launched, group ids [%s]",
+        [...GROUP_IDS ?? []],
+      );
 
       // restart every 12 hours, just to be sure it doesn't hang
       setTimeout(() => {

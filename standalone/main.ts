@@ -41,6 +41,10 @@ const bot = new Telegraf(BOT_TOKEN, {
   handlerTimeout: HANDLER_TIMEOUT,
 });
 
+bot.command("chatid", async (ctx) => {
+  return await ctx.reply(`Chat ID: ${ctx.chat.id}`);
+});
+
 bot.use(async (ctx, next) => {
   resetInactiveTimeout(bot);
 

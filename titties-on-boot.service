@@ -1,11 +1,14 @@
 [Unit]
-Description=Running the TITTIES bot and client.
+Description=Running the TITTIES Telegram bot and speaker engine.
 After=multi-user.target
+Wants=multi-user.target
 
 [Service]
-WorkingDirectory=/home/rock/ee-announcements/standalone
-ExecStart=/home/rock/.deno/bin/deno run -A --unstable-kv main.ts
+Type=simple
+WorkingDirectory=/home/rock/t-i-t-t-i-e-s/standalone
+ExecStart=/home/rock/.deno/bin/deno task run
 Restart=always
+RestartSec=5
 User=rock
 
 [Install]

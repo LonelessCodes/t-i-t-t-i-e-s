@@ -1,4 +1,4 @@
-import { play } from "../util/play.ts";
+import { play } from "./util/play.ts";
 
 export class CombinedPlayer {
   private controller: AbortController | null = null;

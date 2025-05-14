@@ -5,11 +5,11 @@ Wants=multi-user.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/rock/t-i-t-t-i-e-s/standalone
-ExecStart=/home/rock/.deno/bin/deno task run
+WorkingDirectory=/home/pi/t-i-t-t-i-e-s/standalone
+ExecStart=/home/pi/.deno/bin/deno task run
 Restart=always
 RestartSec=5
-User=rock
+User=pi
 
 [Install]
 WantedBy=multi-user.target

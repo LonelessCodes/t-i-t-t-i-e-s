@@ -89,7 +89,7 @@ bot.command("jingle", async (ctx) => {
     );
   }
 
-  const voice = getAudio(ctx.message.reply_to_message);
+  const voice = getAudio(ctx.message.reply_to_message as Message);
   if (!voice) {
     return await ctx.reply(
       "Please reply with /jingle **only** to a voice message or audio file",
@@ -134,7 +134,7 @@ bot.command("play", async (ctx) => {
     );
   }
 
-  const voice = getAudio(ctx.message.reply_to_message);
+  const voice = getAudio(ctx.message.reply_to_message as Message);
   if (!voice) {
     return await ctx.reply(
       "Please reply with /play **only** to a voice message or audio file",

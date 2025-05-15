@@ -2,6 +2,8 @@
 
 Play voice messages from a Telegram group chat on connected speakers.
 
+On Raspberry Pi 3B+ only Deno 2.2.1 runs fine. Newer versions abort trying to allocate 300+ Gi of memory lol.
+
 ## Steps:
 
 1. Copy and populate the .env.template

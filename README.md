@@ -2,7 +2,11 @@
 
 Play voice messages from a Telegram group chat on connected speakers.
 
-On Raspberry Pi 3B+ only Deno 2.2.1 runs fine. Newer versions abort trying to allocate 300+ Gi of memory lol.
+> [!TIP]
+> On Raspberry Pi 3B+ only Deno 2.2.1 runs fine. Newer versions abort trying to allocate 300+ Gi of memory lol.
+
+> [!IMPORTANT]
+> When creating the bot account, don't forget to turn Group Privacy off in the bot settings. (`/mybots` -> `@your_bot` -> `Bot Settings` -> `Group Privacy`)
 
 ## Steps:
 

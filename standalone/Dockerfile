@@ -2,7 +2,7 @@ FROM denoland/deno:debian-2.3.1
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        alsa-base alsa-utils ffmpeg && \
+        alsa-utils ffmpeg && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     addgroup deno audio && \

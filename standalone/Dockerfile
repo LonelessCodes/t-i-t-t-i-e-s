@@ -1,4 +1,4 @@
-FROM denoland/deno:debian-2.2.1
+FROM denoland/deno:debian-2.2.13
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \

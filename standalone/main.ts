@@ -14,18 +14,19 @@ import {
   HEARTBEAT_INTERVAL,
   HEARTBEAT_URL,
   SUCCESS_STICKER,
+  WEBHOOK,
 } from "./env.ts";
 
 if (!await execute("aplay", ["-L"])) {
   console.error(
     "ERROR: Install aplay first. On Debian based systems: apt-get install alsa-base alsa-utils",
   );
-  Deno.exit(1);
+  Deno.exit(127);
 }
 
 // some constants
 const HANDLER_TIMEOUT = 5 * 60 * 1000; // 5 minutes
-const INACTIVE_TIMEOUT = 1000 * 3600; // 1 hour
+const INACTIVE_TIMEOUT = 1000 * 3600 + 10_000; // 1 hour + 10 seconds (for heartbeat ping)
 const MSG_TIMEOUT = 1000 * 3600; // 1 hour
 const FILE_SIZE_LIMIT = 1024 * 1024 * 20; // 20MB
 
@@ -61,7 +62,7 @@ bot.use(async (ctx, next) => {
   try {
     await next();
   } catch (error) {
-    console.error(error);
+    console.error("!!! error during event processing:", error);
     if (FAILURE_STICKER) {
       await ctx.replyWithSticker(FAILURE_STICKER);
     }
@@ -164,6 +165,7 @@ bot.command("play", async (ctx) => {
   }
   await ctx.reply(`Playing...`);
 
+  // decouple from async execution context fix timeouts
   (async () => {
     try {
       console.log(
@@ -179,7 +181,8 @@ bot.command("play", async (ctx) => {
         await ctx.reply("Played successfully.");
       }
     } catch (error) {
-      console.error("playing failed: ", error);
+      console.error("!!! playing failed: ", error);
+      await ctx.reply("Playing failed for some reason.");
     }
   })();
 });
@@ -189,6 +192,12 @@ bot.command("stop", async (ctx) => {
   await ctx.reply("Stopped successfully.");
 });
 
+bot.catch((err) => {
+  console.error("!!! error in bot: ", err);
+  bot.stop("error");
+  Deno.exit(2);
+});
+
 // Enable graceful stop
 Deno.addSignalListener("SIGINT", () => {
   console.log(">>> stopping bot...");
@@ -196,33 +205,46 @@ Deno.addSignalListener("SIGINT", () => {
   Deno.exit(0);
 });
 
-for (;;) {
-  try {
-    await bot.launch(() => {
-      console.log(
-        ">>> launched, group ids [%s]",
-        [...GROUP_IDS ?? []],
-      );
-
-      resetInactiveTimeout(bot);
-
-      if (HEARTBEAT_URL) {
-        const pushHeartbeat = async () => {
-          try {
-            await bot.telegram.getMe();
-            await fetch(HEARTBEAT_URL!);
-          } catch (error) {
-            console.error("internet down", error);
-          }
-        };
-        setInterval(pushHeartbeat, HEARTBEAT_INTERVAL);
-        pushHeartbeat();
+// finally launch the bot
+try {
+  const launchOptions: Telegraf.LaunchOptions = {
+    webhook: WEBHOOK
+      ? {
+        domain: WEBHOOK.DOMAIN,
+        port: WEBHOOK.PORT,
+        secretToken: WEBHOOK.SECRET,
       }
-    });
-    break;
-  } catch (error) {
-    console.error(error);
+      : undefined,
+  };
 
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+  if (WEBHOOK) {
+    console.log(">>> launching using webhook server...");
+  } else {
+    console.log(">>> launching using long polling...");
   }
+
+  await bot.launch(launchOptions, () => {
+    console.log(
+      ">>> launched, group ids [%s]",
+      [...GROUP_IDS ?? []],
+    );
+
+    resetInactiveTimeout(bot);
+
+    if (HEARTBEAT_URL) {
+      const pushHeartbeat = async () => {
+        try {
+          await bot.telegram.getMe();
+          await fetch(HEARTBEAT_URL!);
+        } catch (error) {
+          console.error("!!! internet down", error);
+        }
+      };
+      setInterval(pushHeartbeat, HEARTBEAT_INTERVAL);
+      pushHeartbeat();
+    }
+  });
+} catch (error) {
+  console.error("!!! error launching bot", error);
+  Deno.exit(1);
 }

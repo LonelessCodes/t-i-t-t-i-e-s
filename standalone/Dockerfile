@@ -1,6 +1,10 @@
-FROM denoland/deno:alpine-2.3.1
+FROM denoland/deno:debian-2.3.1
 
-RUN apk add --no-cache alsa-utils alsaconf ffmpeg && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        alsa-base alsa-utils ffmpeg && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
     addgroup deno audio && \
     adduser  root audio
 
@@ -20,4 +24,4 @@ RUN deno cache main.ts
 
 VOLUME [ "/app/data" ]
 
-CMD ["deno", "run", "--allow-read", "--allow-write" "--allow-env", "--allow-net", "--allow-run=aplay", "--unstable-kv", "main.ts"]
+CMD ["run", "--allow-read", "--allow-write" "--allow-env", "--allow-net", "--allow-run=aplay", "--unstable-kv", "main.ts"]

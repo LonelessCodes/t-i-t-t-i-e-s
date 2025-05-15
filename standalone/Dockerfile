@@ -5,8 +5,8 @@ RUN apt-get update && \
         alsa-utils ffmpeg && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    addgroup deno audio && \
-    adduser  root audio
+    usermod -a -G audio deno && \
+    usermod -a -G audio root
 
 WORKDIR /app
 

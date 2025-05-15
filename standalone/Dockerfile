@@ -20,4 +20,4 @@ RUN deno cache main.ts
 
 VOLUME [ "/app/data" ]
 
-CMD ["run", "--allow-read", "--allow-write" "--allow-env", "--allow-net", "--allow-run=aplay", "--unstable-kv", "main.ts"]
+CMD ["deno", "run", "--allow-read", "--allow-write" "--allow-env", "--allow-net", "--allow-run=aplay", "--unstable-kv", "main.ts"]

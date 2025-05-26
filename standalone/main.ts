@@ -16,6 +16,7 @@ import {
   SUCCESS_STICKER,
   WEBHOOK,
 } from "./env.ts";
+import { setAsyncInterval } from "./util/setAsyncInterval.ts";
 
 if (!await execute("aplay", ["-L"])) {
   console.error(
@@ -232,16 +233,22 @@ try {
     resetInactiveTimeout(bot);
 
     if (HEARTBEAT_URL) {
-      const pushHeartbeat = async () => {
-        try {
-          await bot.telegram.getMe();
-          await fetch(HEARTBEAT_URL!);
-        } catch (error) {
-          console.error("!!! internet down", error);
-        }
-      };
-      setInterval(pushHeartbeat, HEARTBEAT_INTERVAL);
-      pushHeartbeat();
+      setAsyncInterval(
+        async () => {
+          try {
+            // check if bot can reach the outside
+            await bot.telegram.getMe();
+            // send heartbeat ping to monitoring service
+            await fetch(HEARTBEAT_URL!);
+          } catch (error) {
+            console.error("!!! internet down", error);
+          }
+        },
+        {
+          interval: HEARTBEAT_INTERVAL,
+          immediate: true,
+        },
+      );
     }
   });
 } catch (error) {

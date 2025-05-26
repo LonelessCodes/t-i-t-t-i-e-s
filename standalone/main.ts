@@ -237,9 +237,13 @@ try {
         async () => {
           try {
             // check if bot can reach the outside
+            const startTime = Date.now();
             await bot.telegram.getMe();
+            const endTime = Date.now();
+            const ping = endTime - startTime;
             // send heartbeat ping to monitoring service
-            await fetch(HEARTBEAT_URL!);
+            await fetch(HEARTBEAT_URL! + `&ping=${ping}`);
+            console.log(`<<< heartbeat, ping: ${ping}ms`);
           } catch (error) {
             console.error("!!! internet down", error);
           }

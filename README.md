@@ -16,4 +16,4 @@ Play voice messages from a Telegram group chat on connected speakers.
 
 ## Running
 
-`cd standalone && deno task run`
+`deno task run`

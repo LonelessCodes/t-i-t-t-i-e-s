@@ -2,7 +2,7 @@ services:
   titties:
     image: ghcr.io/lonelesscodes/t-i-t-t-i-e-s:latest
     build:
-      context: ./standalone/
+      context: ./
       dockerfile: Dockerfile
     container_name: titties
     env_file:

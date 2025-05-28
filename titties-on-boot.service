@@ -5,7 +5,7 @@ Wants=multi-user.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/titties/t-i-t-t-i-e-s/standalone
+WorkingDirectory=/home/titties/t-i-t-t-i-e-s
 ExecStart=/home/titties/.deno/bin/deno task run
 Restart=always
 RestartSec=5

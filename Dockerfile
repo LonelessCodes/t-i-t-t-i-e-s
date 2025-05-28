@@ -20,8 +20,8 @@ RUN deno install
 # These steps will be re-run upon each file change in your working directory:
 COPY . .
 # Compile the main app so that it doesn't need to be compiled each startup/entry.
-RUN deno cache main.ts
+RUN deno cache ./src/main.ts
 
 VOLUME [ "/app/data" ]
 
-CMD ["run", "--allow-read", "--allow-write" "--allow-env", "--allow-net", "--allow-run=aplay,ffmpeg", "--unstable-kv", "main.ts"]
+CMD ["run", "--allow-read", "--allow-write" "--allow-env", "--allow-net", "--allow-run=aplay,ffmpeg", "--unstable-kv", "./src/main.ts"]

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+rm /etc/systemd/system/titties-on-boot.service
 ln titties-on-boot.service /etc/systemd/system/titties-on-boot.service
 
 systemctl stop titties-on-boot.service

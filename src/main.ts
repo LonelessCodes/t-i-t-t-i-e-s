@@ -71,6 +71,14 @@ bot.use(async (ctx, next) => {
   }
 });
 
+bot.command("checkaccess", async (ctx) => {
+  if (SUCCESS_STICKER) {
+    await ctx.replyWithSticker(SUCCESS_STICKER);
+  } else {
+    await ctx.reply("Everything works.");
+  }
+});
+
 function getAudio(message: Message): Voice | Audio | null {
   if ("voice" in message) {
     return message.voice;
